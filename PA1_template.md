@@ -1,4 +1,4 @@
-# Reproducible Research: Peer Assessment 1
+# Reproducible Research: Assignment 1 
 
 
 ## Loading and preprocessing the data
@@ -7,22 +7,40 @@
 setwd("/Users/utamhank/Desktop/DataScience/Reproducible Research/P1")
 df <- read.csv("activity.csv")
 df1 <- df[!is.na(df$steps),]
-totalsteps <- tapply(df1$steps, df1$date, sum)
-totalsteps1 <- totalsteps[!is.na(totalsteps)]
+df2 <- df1[!is.na(df1$date),]
+totalsteps <- tapply(df2$steps, factor(df2$date), sum)
 ```
 
 ## Histogram of total number of steps taken each day
 
 ```r
-hist(totalsteps1, main ="histogram with missing values removed", xlab ="total daily steps")
+hist(totalsteps, main ="histogram with missing values removed", xlab ="total daily steps")
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-2-1.png) 
 
+```r
+dev.copy(png, file="plot1.png", width = 480, height = 480)
+```
+
+```
+## quartz_off_screen 
+##                 3
+```
+
+```r
+dev.off(3)
+```
+
+```
+## quartz_off_screen 
+##                 2
+```
+
 ## What is mean total number of steps taken per day?
 
 ```r
-m1 <- mean(totalsteps1)
+m1 <- mean(totalsteps)
 print(m1)
 ```
 
@@ -33,7 +51,7 @@ print(m1)
 ## what is the median number of steps taken per day
 
 ```r
-median(totalsteps1)
+median(totalsteps)
 ```
 
 ```
@@ -44,48 +62,151 @@ median(totalsteps1)
 
 
 ```r
-avgintervalsteps <- tapply(df1$steps, df1$interval, mean)
+df3 <- df2[!is.na(df2$interval),]
+avgintervalsteps <- tapply(df3$steps, factor(df3$interval), mean)
 plot(avgintervalsteps, xlab="interval", ylab="average steps", type="l")
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-5-1.png) 
 
-## Imputing missing values
+```r
+dev.copy(png, file="plot2.png", width = 480, height = 480)
+```
 
+```
+## quartz_off_screen 
+##                 3
+```
 
 ```r
-df2  <- as.data.frame(totalsteps)
-count <- nrow(df2[is.na(df2$totalsteps),])
+dev.off(3)
+```
+
+```
+## quartz_off_screen 
+##                 2
+```
+
+## Imputing missing values
+## total count for NA for steps
+
+```r
+## total count for NA for steps
+count <- nrow(df) - nrow(df1)
 print(count)
 ```
 
 ```
-## [1] 8
+## [1] 2304
+```
+## total count for NA for date
+
+```r
+count <- nrow(df2) - nrow(df1)
+print(count)
+```
+
+```
+## [1] 0
+```
+## total count for NA for interval
+
+```r
+count <- nrow(df3) - nrow(df2)
+print(count)
+```
+
+```
+## [1] 0
+```
+
+# create a new data frame where all rows with NA are replaced by the average steps for that interval
+
+```r
+dfnew <- df
+dfnew$steps[is.na(dfnew$steps)] <- avgintervalsteps[as.character(dfnew$interval[is.na(dfnew$steps)])]
+```
+
+# Total steps per day for the new data frame
+
+```r
+tsnew <- tapply(dfnew$steps, factor(dfnew$date), sum)
+```
+## Histogram of total number of steps taken each day with imputed values
+
+```r
+hist(tsnew, main ="histogram with missing values replaced ", xlab ="total daily steps")
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-11-1.png) 
+
+```r
+dev.copy(png, file="plot3.png", width = 480, height = 480)
+```
+
+```
+## quartz_off_screen 
+##                 3
 ```
 
 ```r
-df2$totalsteps[is.na(df2$totalsteps)] <- rep(c(m1), count)
-hist(df2$totalsteps, mail="histogram with imputed values", xlab ="average daily steps")
+dev.off(3)
 ```
 
 ```
-## Warning in plot.window(xlim, ylim, "", ...): "mail" is not a graphical
-## parameter
+## quartz_off_screen 
+##                 2
+```
+
+## What is mean total number of steps taken per day with the new data set?
+
+```r
+m1 <- mean(tsnew)
+print(m1)
 ```
 
 ```
-## Warning in title(main = main, sub = sub, xlab = xlab, ylab = ylab, ...):
-## "mail" is not a graphical parameter
+## [1] 10766.19
+```
+
+## what is the median number of steps taken per day with the new data set
+
+```r
+median(tsnew)
 ```
 
 ```
-## Warning in axis(1, ...): "mail" is not a graphical parameter
+## [1] 10766.19
 ```
-
-```
-## Warning in axis(2, ...): "mail" is not a graphical parameter
-```
-
-![](PA1_template_files/figure-html/unnamed-chunk-6-1.png) 
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+```r
+# convert time to weekdays
+
+dfnew$datenew <- strptime(dfnew[,"date"], "%Y-%m-%d")
+dfnew$day <- weekdays(dfnew$datenew)
+dfnew$day <- factor(dfnew$day)
+# collapse levels into 2
+levels(dfnew$day) <- c("weekday","weekday","weekend","weekend", "weekday", "weekday", "weekday")
+
+avgstepsnew  <- tapply(dfnew$steps, factor(dfnew$interval), mean)
+
+x <- with(dfnew, tapply(steps, list(interval, day), mean))
+
+dev.copy(png, file="plot4.png", width = 480, height = 480)
+```
+
+```
+## quartz_off_screen 
+##                 3
+```
+
+```r
+dev.off(3)
+```
+
+```
+## quartz_off_screen 
+##                 2
+```
