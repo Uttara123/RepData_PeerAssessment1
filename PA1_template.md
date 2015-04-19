@@ -192,6 +192,13 @@ levels(dfnew$day) <- c("weekday","weekday","weekend","weekend", "weekday", "week
 
 avgstepsnew  <- tapply(dfnew$steps, factor(dfnew$interval), mean)
 
+library(lattice)
+xyplot(steps ~ interval | day, data = dfnew, layout = c(1,2) , type = "l" )
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-14-1.png) 
+
+```r
 x <- with(dfnew, tapply(steps, list(interval, day), mean))
 
 dev.copy(png, file="plot4.png", width = 480, height = 480)
